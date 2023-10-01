@@ -6,7 +6,7 @@ set( CMAKE_CXX_STANDARD 20 )
 
 add_library( visualization_tools SHARED visualization_tools.cpp)
 
-target_link_libraries( visualization_tools PUBLIC SDL2pp::SDL2pp )
+target_link_libraries( visualization_tools PUBLIC SDL2pp )
 
 target_compile_options( visualization_tools PUBLIC -fsanitize=leak -g )
 
