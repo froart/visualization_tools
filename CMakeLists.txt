@@ -1,17 +1,17 @@
 cmake_minimum_required( VERSION 3.22.1 )
 
-project( visualization_tools )
+project( VT )
 
 set( CMAKE_CXX_STANDARD 20 )
 
-add_library( visualization_tools SHARED visualization_tools.cpp)
+add_library( VT SHARED vt_framebuffer.cpp )
 
-target_link_libraries( visualization_tools PUBLIC SDL2pp )
+target_link_libraries( VT PUBLIC SDL2pp )
 
-target_compile_options( visualization_tools PUBLIC -fsanitize=leak -g )
+target_compile_options( VT PUBLIC -fsanitize=leak -g )
 
-set_target_properties( visualization_tools PROPERTIES PUBLIC_HEADER visualization_tools.hpp )
+set_target_properties( VT PROPERTIES PUBLIC_HEADER vt_framebuffer.hpp )
 
-install( TARGETS visualization_tools
+install( TARGETS VT
          LIBRARY DESTINATION lib 
          PUBLIC_HEADER DESTINATION include )
