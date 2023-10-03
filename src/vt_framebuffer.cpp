@@ -1,4 +1,4 @@
-#include "vt_framebuffer.hpp"
+#include "../include/vt_framebuffer.hpp"
 
 namespace vt {
 
@@ -45,7 +45,9 @@ namespace vt {
                                              -1, 
                                              SDL_RENDERER_ACCELERATED 
                                              | SDL_RENDERER_PRESENTVSYNC );
-    } catch ( SDL2pp::Exception& e ) {
+    } 
+    catch ( SDL2pp::Exception& e ) 
+    {
       std::cerr << "Error in: " << e.GetSDLFunction() << std::endl;
       std::cerr << "  Reason: " << e.GetSDLError() << std::endl;
     }
@@ -53,8 +55,26 @@ namespace vt {
     this->pixels.resize( this->pixelNumber );
     for( int j = 0; j < height; ++j )
       for( int i = 0; i < width; ++i )
-         // this->pixels_[i + j * screenWidth_] = SDL_Pixel(renderer_, j, i);
          ( *this )( j, i )= SDL_Pixel(this->renderer, j, i);
+  }
+
+  void FrameBuffer::update()
+  {
+    this->renderer->Present();
+  }
+  
+  bool FrameBuffer::requestedToExit()
+  {
+    SDL_Event event;
+    SDL_PollEvent( &event );
+    bool result;
+    if ( event.type == SDL_QUIT )
+      result = true;
+    else if ( event.type == SDL_KEYDOWN )
+      result = true;
+    else if ( event.key.keysym.sym == SDLK_ESCAPE )
+      result = true;
+    return result;
   }
 
   FrameBuffer::~FrameBuffer()

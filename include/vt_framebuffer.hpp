@@ -2,8 +2,40 @@
 
 #include <iostream>
 #include <vector>
+#include <utility>
+#include <string>
 #include <SDL2/SDL.h>
 #include <SDL2pp/SDL2pp.hh>
+
+/*
+typedef uint8_t  Uint8;
+typedef uint32_t Uint32;
+enum SDL_WindowFlags;
+
+namespace SDL2pp {
+
+  using namespace std;
+ 
+  class Window {
+    public:
+      Window( const string&, unsigned int, unsigned int, const unsigned int&, const unsigned int&, SDL_WindowFlags );
+  };
+  class Renderer
+  {
+    public:
+      Renderer( Window, int, Uint32 );
+      int SetDrawColor( Uint8, Uint8, Uint8, Uint8 );
+      int DrawPoint( int, int );
+      int Present();
+  };
+  class Exception
+  {
+    public:
+      string GetSDLFunction();
+      string GetSDLError();
+  };
+}
+*/
 
 namespace vt 
 {
@@ -96,6 +128,7 @@ namespace vt
       };
       
       void update();
+      bool requestedToExit();
 
       ~FrameBuffer(); 
   };
