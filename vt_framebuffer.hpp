@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <SDL2/SDL.h>
 #include <SDL2pp/SDL2pp.hh>
 
 namespace vt 
@@ -53,40 +54,41 @@ namespace vt
       SDL2pp::Renderer* renderer;
       vector<SDL_Pixel> pixels;
       float             aspectRatio;
-      unsigned int      screenWidth;
-      unsigned int      screenHeight;
+      unsigned int      width;
+      unsigned int      height;
       unsigned int      pixelNumber;
-      unsigned int      screenSize; // in bytes
+      unsigned int      size; // in bytes
 
     public:
 
       FrameBuffer() {};
       FrameBuffer( const string, const unsigned int, const unsigned int );
-      FrameBuffer& operator= ( SDL_Screen&& other ) noexcept
+      FrameBuffer& operator= ( FrameBuffer&& other ) noexcept
       {
         if( this != &other ) 
         { 
           this->pixels       = move( other.pixels );           
           this->aspectRatio  = exchange( other.aspectRatio,  0.0 );
-          this->screenWidth  = exchange( other.screenWidth,  0 );
-          this->screenHeight = exchange( other.screenHeight, 0 );
-          this->pixelNumber  = exchange( other.pixelNumber,  0 );
-          this->screenSize   = exchange( other.screenSize,   0 );
-          this->window       = exchange( other.window,       nullptr );
-          this->renderer     = exchange( other.renderer,     nullptr );
+          this->width        = exchange( other.width,          0 );
+          this->height       = exchange( other.height,         0 );
+          this->pixelNumber  = exchange( other.pixelNumber,    0 );
+          this->size         = exchange( other.size,           0 );
+          this->window       = exchange( other.window,   nullptr );
+          this->renderer     = exchange( other.renderer, nullptr );
         }
         return *this;
       }
 
-      unsigned int getWidth()    const { return this->screenWidth;  }
-      unsigned int getHeight()   const { return this->screenHeight; }
+      unsigned int getWidth()    const { return this->width;        }
+      unsigned int getHeight()   const { return this->height;       }
       unsigned int getPixelNum() const { return this->pixelNumber;  }
-      unsigned int getSize()     const { return this->screenSize;   }
+      unsigned int getSize()     const { return this->size;         }
       float getAspectRatio()     const { return this->aspectRatio;  }
 
-      SDL_Pixel& operator() ( const unsigned int rowIndex, const unsigned int colIndex ) 
+      SDL_Pixel& operator() ( const unsigned int rowIndex, 
+                              const unsigned int colIndex ) 
       {
-        return this->pixels[colIndex + this->screenWidth * rowIndex];
+        return this->pixels[colIndex + this->width * rowIndex];
       };
       SDL_Pixel& operator[] ( unsigned int index ) 
       { 
@@ -95,7 +97,6 @@ namespace vt
       
       void update();
 
-      ~SDL_Screen(); 
-
-  }
+      ~FrameBuffer(); 
+  };
 }

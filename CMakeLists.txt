@@ -8,6 +8,8 @@ add_library( VT SHARED vt_framebuffer.cpp )
 
 target_link_libraries( VT PUBLIC SDL2pp )
 
+target_include_directories( VT PUBLIC /usr/include/SDL2/ )
+
 target_compile_options( VT PUBLIC -fsanitize=leak -g )
 
 set_target_properties( VT PROPERTIES PUBLIC_HEADER vt_framebuffer.hpp )
