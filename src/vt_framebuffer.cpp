@@ -10,6 +10,12 @@ namespace vt {
 
   using namespace std;
 
+  struct WindowInfo
+  {
+    SDL2pp::Window*   window;
+    SDL2pp::Renderer* renderer;
+  };
+
   class FrameBuffer::Pixel
   {
 
@@ -52,9 +58,9 @@ namespace vt {
     if( this != &other ) 
     {
       renderer = exchange( other.renderer, nullptr );
-      rowIndex = exchange( other.rowIndex, 0 ); 
-      colIndex = exchange( other.colIndex, 0 ); 
-     }
+      rowIndex = exchange( other.rowIndex,       0 ); 
+      colIndex = exchange( other.colIndex,       0 ); 
+    }
      return *this; 
    }; 
 
@@ -89,16 +95,17 @@ namespace vt {
     this->aspectRatio = ( static_cast<float>( width ) / static_cast<float>  ( height ) );
     this->width       = width;
     this->height      = height;
+    this->pWindowInfo = new WindowInfo;
     try {
-      this->window   = new SDL2pp::Window( name,
-                                           SDL_WINDOWPOS_UNDEFINED, 
-                                           SDL_WINDOWPOS_UNDEFINED,
-                                           width, height, 
-                                           SDL_WINDOW_SHOWN );
-      this->renderer = new SDL2pp::Renderer( *this->window, 
-                                             -1, 
-                                             SDL_RENDERER_ACCELERATED 
-                                             | SDL_RENDERER_PRESENTVSYNC );
+      this->pWindowInfo->window   = new SDL2pp::Window( name,
+                                                        SDL_WINDOWPOS_UNDEFINED, 
+                                                        SDL_WINDOWPOS_UNDEFINED,
+                                                        width, height, 
+                                                        SDL_WINDOW_SHOWN );
+      this->pWindowInfo->renderer = new SDL2pp::Renderer( *this->pWindowInfo->window, 
+                                                          -1, 
+                                                          SDL_RENDERER_ACCELERATED 
+                                                          | SDL_RENDERER_PRESENTVSYNC );
     } 
     catch ( SDL2pp::Exception& e ) 
     {
@@ -109,21 +116,21 @@ namespace vt {
     this->pixels.resize( this->pixelNumber );
     for( int j = 0; j < height; ++j )
       for( int i = 0; i < width; ++i )
-         ( *this )( j, i ) = Pixel( this->renderer, j, i );
+         ( *this )( j, i ) = Pixel( this->pWindowInfo->renderer, j, i );
   }
 
   FrameBuffer& FrameBuffer::operator= ( FrameBuffer&& other ) noexcept
   {
     if( this != &other ) 
     { 
-      this->pixels       = move( other.pixels );           
-      this->aspectRatio  = exchange( other.aspectRatio,  0.0 );
-      this->width        = exchange( other.width,          0 );
-      this->height       = exchange( other.height,         0 );
-      this->pixelNumber  = exchange( other.pixelNumber,    0 );
-      this->size         = exchange( other.size,           0 );
-      this->window       = exchange( other.window,   nullptr );
-      this->renderer     = exchange( other.renderer, nullptr );
+      this->pixels                    = move( other.pixels );           
+      this->aspectRatio               = exchange( other.aspectRatio,               0.0 );
+      this->width                     = exchange( other.width,                       0 );
+      this->height                    = exchange( other.height,                      0 );
+      this->pixelNumber               = exchange( other.pixelNumber,                 0 );
+      this->size                      = exchange( other.size,                        0 );
+      this->pWindowInfo->window       = exchange( other.pWindowInfo->window,   nullptr );
+      this->pWindowInfo->renderer     = exchange( other.pWindowInfo->renderer, nullptr );
     }
     return *this;
   }
@@ -150,7 +157,7 @@ namespace vt {
   }
 
   FrameBuffer::Pixel& FrameBuffer::operator() ( const unsigned int rowIndex, 
-                                       const unsigned int colIndex ) 
+                                                const unsigned int colIndex ) 
   {
     return this->pixels[colIndex + this->width * rowIndex];
   };
@@ -161,7 +168,7 @@ namespace vt {
 
   void FrameBuffer::update()
   {
-    this->renderer->Present();
+    this->pWindowInfo->renderer->Present();
   }
   
   bool FrameBuffer::requestedToExit()
@@ -180,7 +187,8 @@ namespace vt {
 
   FrameBuffer::~FrameBuffer()
   {
-    delete this->renderer;
-    delete this->window;
+    delete this->pWindowInfo->renderer;
+    delete this->pWindowInfo->window;
+    delete this->pWindowInfo;
   }
 }

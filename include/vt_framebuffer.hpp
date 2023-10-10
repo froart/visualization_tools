@@ -3,15 +3,6 @@
 #include <vector>
 #include <string>
 
-namespace SDL2pp 
-{
-
-  class Window;
-  class Renderer;
-  class Exception;
-
-}
-
 namespace vt 
 {
 
@@ -21,8 +12,7 @@ namespace vt
     private:
 
       class Pixel;
-      SDL2pp::Window*    window;
-      SDL2pp::Renderer*  renderer;
+      struct WindowInfo* pWindowInfo;
       std::vector<Pixel> pixels;
       float              aspectRatio;
       unsigned int       width;
