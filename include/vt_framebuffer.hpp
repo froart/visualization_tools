@@ -1,52 +1,34 @@
 #pragma once
+
 #include <vector>
 #include <string>
 
 namespace SDL2pp 
 {
+
   class Window;
   class Renderer;
   class Exception;
+
 }
 
 namespace vt 
 {
 
-  // using namespace std;
-
   class FrameBuffer
   {
+
     private:
-      class SDL_Pixel 
-      {
-        private:
-         
-          SDL2pp::Renderer* renderer;
-          unsigned int      rowIndex;
-          unsigned int      colIndex;
-         
-        public:
 
-          SDL_Pixel() {};
-          SDL_Pixel( SDL2pp::Renderer*, unsigned int, unsigned int ); 
-          SDL_Pixel( SDL_Pixel&& ) noexcept;
-          SDL_Pixel& operator= ( SDL_Pixel&& ) noexcept; 
-          SDL_Pixel& operator= ( std::initializer_list<int> );
-
-          SDL_Pixel( const SDL_Pixel& ) = delete;
-          SDL_Pixel& operator= ( const SDL_Pixel& ) = delete;
-          ~SDL_Pixel();
-        /* public */
-      }; // class SDL_Pixel
-    
-      SDL2pp::Window*   window;
-      SDL2pp::Renderer* renderer;
-      std::vector<SDL_Pixel> pixels;
-      float             aspectRatio;
-      unsigned int      width;
-      unsigned int      height;
-      unsigned int      pixelNumber;
-      unsigned int      size; // in bytes
+      class Pixel;
+      SDL2pp::Window*    window;
+      SDL2pp::Renderer*  renderer;
+      std::vector<Pixel> pixels;
+      float              aspectRatio;
+      unsigned int       width;
+      unsigned int       height;
+      unsigned int       pixelNumber;
+      unsigned int       size; // in bytes
 
     public:
 
@@ -60,8 +42,8 @@ namespace vt
       unsigned int getSize() const;
       float getAspectRatio() const;
 
-      SDL_Pixel& operator() ( const unsigned int, const unsigned int );
-      SDL_Pixel& operator[] ( unsigned int );
+      Pixel& operator() ( const unsigned int, const unsigned int );
+      Pixel& operator[] ( unsigned int );
      
       void update();
       bool requestedToExit();

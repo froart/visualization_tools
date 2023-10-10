@@ -10,21 +10,44 @@ namespace vt {
 
   using namespace std;
 
-  FrameBuffer::SDL_Pixel::SDL_Pixel( SDL2pp::Renderer* renderer, unsigned int rowIndex, unsigned int colIndex ) 
+  class FrameBuffer::Pixel
+  {
+
+    private:
+
+      SDL2pp::Renderer* renderer;
+      unsigned int      rowIndex;
+      unsigned int      colIndex;
+         
+    public:
+
+      Pixel() {};
+      Pixel( SDL2pp::Renderer*, unsigned int, unsigned int ); 
+      Pixel( Pixel&& ) noexcept;
+      Pixel& operator= ( Pixel&& ) noexcept; 
+      Pixel& operator= ( std::initializer_list<int> );
+
+      Pixel( const Pixel& ) = delete;
+      Pixel& operator= ( const Pixel& ) = delete;
+      ~Pixel();
+    /* public */
+  }; // class SDL_Pixel
+
+  FrameBuffer::Pixel::Pixel( SDL2pp::Renderer* renderer, unsigned int rowIndex, unsigned int colIndex ) 
   {
     this->renderer = renderer;
     this->rowIndex = rowIndex;
     this->colIndex = colIndex;
   }; 
 
-  FrameBuffer::SDL_Pixel::SDL_Pixel( FrameBuffer::SDL_Pixel&& other ) noexcept 
+  FrameBuffer::Pixel::Pixel( FrameBuffer::Pixel&& other ) noexcept 
   {
     this->renderer = exchange( other.renderer, nullptr );
     this->colIndex = exchange( other.colIndex, 0 ); 
     this->rowIndex = exchange( other.rowIndex, 0 ); 
   }; 
 
-  FrameBuffer::SDL_Pixel& FrameBuffer::SDL_Pixel::operator= ( FrameBuffer::SDL_Pixel&& other ) noexcept 
+  FrameBuffer::Pixel& FrameBuffer::Pixel::operator= ( FrameBuffer::Pixel&& other ) noexcept 
   {
     if( this != &other ) 
     {
@@ -35,7 +58,7 @@ namespace vt {
      return *this; 
    }; 
 
-  FrameBuffer::SDL_Pixel& FrameBuffer::SDL_Pixel::operator= ( initializer_list<int> colorValues ) {
+  FrameBuffer::Pixel& FrameBuffer::Pixel::operator= ( initializer_list<int> colorValues ) {
     // TODO: check the size of passed initializer list at compile time, not runtime
     if( colorValues.size() != 4 ) 
     {
@@ -51,7 +74,7 @@ namespace vt {
     return *this; 
   };
 
-  FrameBuffer::SDL_Pixel::~SDL_Pixel() {
+  FrameBuffer::Pixel::~Pixel() {
     this->renderer = nullptr;
     this->rowIndex = 0;
     this->colIndex = 0;
@@ -62,7 +85,7 @@ namespace vt {
                             const unsigned int height )
   {
     this->pixelNumber = height * width;
-    this->size        = height * width * sizeof( SDL_Pixel );
+    this->size        = height * width * sizeof( Pixel );
     this->aspectRatio = ( static_cast<float>( width ) / static_cast<float>  ( height ) );
     this->width       = width;
     this->height      = height;
@@ -86,7 +109,7 @@ namespace vt {
     this->pixels.resize( this->pixelNumber );
     for( int j = 0; j < height; ++j )
       for( int i = 0; i < width; ++i )
-         ( *this )( j, i )= SDL_Pixel(this->renderer, j, i);
+         ( *this )( j, i ) = Pixel( this->renderer, j, i );
   }
 
   FrameBuffer& FrameBuffer::operator= ( FrameBuffer&& other ) noexcept
@@ -126,12 +149,12 @@ namespace vt {
     return this->aspectRatio;
   }
 
-  FrameBuffer::SDL_Pixel& FrameBuffer::operator() ( const unsigned int rowIndex, 
+  FrameBuffer::Pixel& FrameBuffer::operator() ( const unsigned int rowIndex, 
                                        const unsigned int colIndex ) 
   {
     return this->pixels[colIndex + this->width * rowIndex];
   };
-  FrameBuffer::SDL_Pixel& FrameBuffer::operator[] ( unsigned int index ) 
+  FrameBuffer::Pixel& FrameBuffer::operator[] ( unsigned int index ) 
   { 
     return this->pixels[index]; 
   };
