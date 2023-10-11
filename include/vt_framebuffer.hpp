@@ -12,13 +12,8 @@ namespace vt
     private:
 
       class Pixel;
-      struct WindowInfo* pWindowInfo;
       std::vector<Pixel> pixels;
-      float              aspectRatio;
-      unsigned int       width;
-      unsigned int       height;
-      unsigned int       pixelNumber;
-      unsigned int       size; // in bytes
+      struct FrameBufferInfo* pFrameBufferInfo;
 
     public:
 
@@ -35,12 +30,12 @@ namespace vt
       float getAspectRatio() const;
 
       /* access operator */
-      Pixel& operator() ( const unsigned int, const unsigned int );
+      inline Pixel& operator() ( const unsigned int, const unsigned int );
      
       /* update window */
-      void update();
+      inline void update();
       /* check if the exit button was pressed */
-      bool requestedToExit();
+      inline bool requestedToExit();
 
       ~FrameBuffer(); 
   };

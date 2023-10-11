@@ -10,10 +10,15 @@ namespace vt {
 
   using namespace std;
 
-  struct WindowInfo
+  struct FrameBufferInfo
   {
     SDL2pp::Window*   window;
     SDL2pp::Renderer* renderer;
+    float             aspectRatio;
+    unsigned int      width;
+    unsigned int      height;
+    unsigned int      pixelNumber;
+    unsigned int      size; // in bytes
   };
 
   class FrameBuffer::Pixel
@@ -27,12 +32,12 @@ namespace vt {
          
     public:
 
-      Pixel() {};
+      Pixel() {}; /* required for vector class */
       Pixel( SDL2pp::Renderer*, unsigned int, unsigned int ); 
+      inline Pixel& operator= ( std::initializer_list<int> );
+
       Pixel( Pixel&& ) noexcept;
       Pixel& operator= ( Pixel&& ) noexcept; 
-      Pixel& operator= ( std::initializer_list<int> );
-
       Pixel( const Pixel& ) = delete;
       Pixel& operator= ( const Pixel& ) = delete;
       ~Pixel();
@@ -61,16 +66,17 @@ namespace vt {
       rowIndex = exchange( other.rowIndex,       0 ); 
       colIndex = exchange( other.colIndex,       0 ); 
     }
-     return *this; 
+     return *this;
    }; 
 
-  FrameBuffer::Pixel& FrameBuffer::Pixel::operator= ( initializer_list<int> colorValues ) {
-    // TODO: check the size of passed initializer list at compile time, not runtime
+  inline FrameBuffer::Pixel& FrameBuffer::Pixel::operator= ( initializer_list<int> colorValues ) {
+#ifndef NDEBUG
     if( colorValues.size() != 4 ) 
     {
       throw invalid_argument( "Initializer list must be exactly 4 elements to assign!" );
     }
-    // Send color straight to the screen 
+#endif
+    // Send color straight to the framebuffer 
     auto it = colorValues.begin();
     this->renderer->SetDrawColor( static_cast<Uint8>( *it     ),
                                   static_cast<Uint8>( *(it+1) ), 
@@ -82,30 +88,29 @@ namespace vt {
 
   FrameBuffer::Pixel::~Pixel() {
     this->renderer = nullptr;
-    this->rowIndex = 0;
-    this->colIndex = 0;
   };
 
   FrameBuffer::FrameBuffer( const string       name, 
                             const unsigned int width,
                             const unsigned int height )
   {
-    this->pixelNumber = height * width;
-    this->size        = height * width * sizeof( Pixel );
-    this->aspectRatio = ( static_cast<float>( width ) / static_cast<float>  ( height ) );
-    this->width       = width;
-    this->height      = height;
-    this->pWindowInfo = new WindowInfo;
+    this->pFrameBufferInfo              = new FrameBufferInfo;
+    this->pFrameBufferInfo->pixelNumber = height * width;
+    this->pFrameBufferInfo->size        = height * width * sizeof( Pixel );
+    this->pFrameBufferInfo->aspectRatio = static_cast<float>( width ) 
+                                          / static_cast<float>( height );
+    this->pFrameBufferInfo->width       = width;
+    this->pFrameBufferInfo->height      = height;
     try {
-      this->pWindowInfo->window   = new SDL2pp::Window( name,
-                                                        SDL_WINDOWPOS_UNDEFINED, 
-                                                        SDL_WINDOWPOS_UNDEFINED,
-                                                        width, height, 
-                                                        SDL_WINDOW_SHOWN );
-      this->pWindowInfo->renderer = new SDL2pp::Renderer( *this->pWindowInfo->window, 
-                                                          -1, 
-                                                          SDL_RENDERER_ACCELERATED 
-                                                          | SDL_RENDERER_PRESENTVSYNC );
+      this->pFrameBufferInfo->window   = new SDL2pp::Window( name,
+                                                             SDL_WINDOWPOS_UNDEFINED, 
+                                                             SDL_WINDOWPOS_UNDEFINED,
+                                                             width, height, 
+                                                             SDL_WINDOW_SHOWN );
+      this->pFrameBufferInfo->renderer = new SDL2pp::Renderer( *this->pFrameBufferInfo->window, 
+                                                               -1, 
+                                                               SDL_RENDERER_ACCELERATED 
+                                                               | SDL_RENDERER_PRESENTVSYNC );
     } 
     catch ( SDL2pp::Exception& e ) 
     {
@@ -113,61 +118,61 @@ namespace vt {
       std::cerr << "  Reason: " << e.GetSDLError() << std::endl;
     }
 
-    this->pixels.resize( this->pixelNumber );
+    this->pixels.resize( this->pFrameBufferInfo->pixelNumber );
     for( int j = 0; j < height; ++j )
       for( int i = 0; i < width; ++i )
-         ( *this )( j, i ) = Pixel( this->pWindowInfo->renderer, j, i );
+         ( *this )( j, i ) = Pixel( this->pFrameBufferInfo->renderer, j, i );
   }
 
   FrameBuffer& FrameBuffer::operator= ( FrameBuffer&& other ) noexcept
   {
     if( this != &other ) 
     { 
-      this->pixels                    = move( other.pixels );           
-      this->aspectRatio               = exchange( other.aspectRatio,               0.0 );
-      this->width                     = exchange( other.width,                       0 );
-      this->height                    = exchange( other.height,                      0 );
-      this->pixelNumber               = exchange( other.pixelNumber,                 0 );
-      this->size                      = exchange( other.size,                        0 );
-      this->pWindowInfo->window       = exchange( other.pWindowInfo->window,   nullptr );
-      this->pWindowInfo->renderer     = exchange( other.pWindowInfo->renderer, nullptr );
+      this->pixels                        = move( other.pixels );           
+      this->pFrameBufferInfo->aspectRatio = exchange( other.pFrameBufferInfo->aspectRatio,     0.0 );
+      this->pFrameBufferInfo->width       = exchange( other.pFrameBufferInfo->width,             0 );
+      this->pFrameBufferInfo->height      = exchange( other.pFrameBufferInfo->height,            0 );
+      this->pFrameBufferInfo->pixelNumber = exchange( other.pFrameBufferInfo->pixelNumber,       0 );
+      this->pFrameBufferInfo->size        = exchange( other.pFrameBufferInfo->size,              0 );
+      this->pFrameBufferInfo->window      = exchange( other.pFrameBufferInfo->window,      nullptr );
+      this->pFrameBufferInfo->renderer    = exchange( other.pFrameBufferInfo->renderer,    nullptr );
     }
     return *this;
   }
 
   unsigned int FrameBuffer::getWidth() const 
   { 
-    return this->width;
+    return this->pFrameBufferInfo->width;
   }
   unsigned int FrameBuffer::getHeight() const 
   { 
-    return this->height;
+    return this->pFrameBufferInfo->height;
   }
   unsigned int FrameBuffer::getPixelNum() const 
   { 
-    return this->pixelNumber;
+    return this->pFrameBufferInfo->pixelNumber;
   }
   unsigned int FrameBuffer::getSize() const 
   { 
-    return this->size;
+    return this->pFrameBufferInfo->size;
   }
   float FrameBuffer::getAspectRatio() const 
   { 
-    return this->aspectRatio;
+    return this->pFrameBufferInfo->aspectRatio;
   }
 
-  FrameBuffer::Pixel& FrameBuffer::operator() ( const unsigned int rowIndex, 
+  inline FrameBuffer::Pixel& FrameBuffer::operator() ( const unsigned int rowIndex, 
                                                 const unsigned int colIndex ) 
   {
-    return this->pixels[colIndex + this->width * rowIndex];
+    return this->pixels[colIndex + this->pFrameBufferInfo->width * rowIndex];
   };
 
-  void FrameBuffer::update()
+  inline void FrameBuffer::update()
   {
-    this->pWindowInfo->renderer->Present();
+    this->pFrameBufferInfo->renderer->Present();
   }
   
-  bool FrameBuffer::requestedToExit()
+  inline bool FrameBuffer::requestedToExit()
   {
     SDL_Event event;
     SDL_PollEvent( &event );
@@ -183,8 +188,8 @@ namespace vt {
 
   FrameBuffer::~FrameBuffer()
   {
-    delete this->pWindowInfo->renderer;
-    delete this->pWindowInfo->window;
-    delete this->pWindowInfo;
+    delete this->pFrameBufferInfo->renderer;
+    delete this->pFrameBufferInfo->window;
+    delete this->pFrameBufferInfo;
   }
 }
