@@ -161,10 +161,6 @@ namespace vt {
   {
     return this->pixels[colIndex + this->width * rowIndex];
   };
-  FrameBuffer::Pixel& FrameBuffer::operator[] ( unsigned int index ) 
-  { 
-    return this->pixels[index]; 
-  };
 
   void FrameBuffer::update()
   {

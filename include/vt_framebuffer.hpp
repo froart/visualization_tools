@@ -22,20 +22,24 @@ namespace vt
 
     public:
 
-      FrameBuffer() {};
+      /* constructor */
       FrameBuffer( const std::string, const unsigned int, const unsigned int );
+      /* move constuctor */
       FrameBuffer& operator= ( FrameBuffer&& ) noexcept;
 
+      /* Window information */
       unsigned int getWidth() const;
       unsigned int getHeight() const;
       unsigned int getPixelNum() const;
       unsigned int getSize() const;
       float getAspectRatio() const;
 
+      /* access operator */
       Pixel& operator() ( const unsigned int, const unsigned int );
-      Pixel& operator[] ( unsigned int );
      
+      /* update window */
       void update();
+      /* check if the exit button was pressed */
       bool requestedToExit();
 
       ~FrameBuffer(); 
