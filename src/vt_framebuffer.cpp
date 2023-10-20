@@ -12,6 +12,7 @@ namespace vt {
 
   struct FrameBufferInfo
   {
+   
     SDL2pp::Window*   window;
     SDL2pp::Renderer* renderer;
     float             aspectRatio;
@@ -19,6 +20,7 @@ namespace vt {
     unsigned int      height;
     unsigned int      pixelNumber;
     unsigned int      size; // in bytes
+  
   };
 
   class FrameBuffer::Pixel
@@ -29,12 +31,16 @@ namespace vt {
       SDL2pp::Renderer* renderer;
       unsigned int      rowIndex;
       unsigned int      colIndex;
+      Uint8             r = 0;
+      Uint8             g = 0;
+      Uint8             b = 0;
+      Uint8             a = 0;
          
     public:
 
       Pixel() {}; /* required for vector class */
       Pixel( SDL2pp::Renderer*, unsigned int, unsigned int ); 
-      inline Pixel& operator= ( std::initializer_list<int> );
+      inline Pixel& operator= ( std::initializer_list<unsigned char> );
 
       Pixel( Pixel&& ) noexcept;
       Pixel& operator= ( Pixel&& ) noexcept; 
@@ -66,22 +72,26 @@ namespace vt {
       rowIndex = exchange( other.rowIndex,       0 ); 
       colIndex = exchange( other.colIndex,       0 ); 
     }
-     return *this;
-   }; 
+    return *this;
+  }; 
 
-  inline FrameBuffer::Pixel& FrameBuffer::Pixel::operator= ( initializer_list<int> colorValues ) {
+  inline FrameBuffer::Pixel& FrameBuffer::Pixel::operator= ( initializer_list<unsigned char> colorValues ) {
 #ifndef NDEBUG
-    if( colorValues.size() != 4 ) 
+    if( colorValues.size() != 4 ) // TODO; make this check at compile time
     {
       throw invalid_argument( "Initializer list must be exactly 4 elements to assign!" );
     }
 #endif
     // Send color straight to the framebuffer 
     auto it = colorValues.begin();
-    this->renderer->SetDrawColor( static_cast<Uint8>( *it     ),
-                                  static_cast<Uint8>( *(it+1) ), 
-                                  static_cast<Uint8>( *(it+2) ), 
-                                  static_cast<Uint8>( *(it+3) )  );
+    this->r = static_cast<Uint8>( *it );
+    this->g = static_cast<Uint8>( *(it + 1) );
+    this->b = static_cast<Uint8>( *(it + 2) );
+    this->a = static_cast<Uint8>( *(it + 3) );
+    this->renderer->SetDrawColor( this->r,
+                                  this->g, 
+                                  this->b, 
+                                  this->a );
     this->renderer->DrawPoint( this->colIndex , this->rowIndex );
     return *this; 
   };
