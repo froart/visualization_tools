@@ -11,8 +11,6 @@ namespace vt
 
     private:
 
-      class Pixel;
-      std::vector<Pixel> pixels;
       struct FrameBufferInfo* pFrameBufferInfo;
 
     public:
@@ -29,13 +27,12 @@ namespace vt
       unsigned int getSize() const;
       float getAspectRatio() const;
 
-      /* access operator */
-      inline Pixel& operator() ( const unsigned int, const unsigned int );
-     
+      /* bind value array */
+      void bind( std::vector<float>* image );
       /* update window */
-      inline void update();
+      void update();
       /* check if the exit button was pressed */
-      inline bool requestedToExit();
+      bool requestedToExit();
 
       ~FrameBuffer(); 
   };
