@@ -20,7 +20,6 @@ namespace vt {
     unsigned int      width;
     unsigned int      height;
     unsigned int      pixelNumber;
-    unsigned int      size; // in bytes
   
   };
 
@@ -30,7 +29,6 @@ namespace vt {
   {
     this->pFrameBufferInfo              = new FrameBufferInfo;
     this->pFrameBufferInfo->pixelNumber = height * width;
-    // this->pFrameBufferInfo->size        = height * width * sizeof( Pixel );
     this->pFrameBufferInfo->aspectRatio = static_cast<float>( width ) 
                                           / static_cast<float>( height );
     this->pFrameBufferInfo->width       = width;
@@ -105,7 +103,7 @@ namespace vt {
             static_cast<Uint8>( ( *this->pFrameBufferInfo->boundImage )[idx] * 255 ),
             static_cast<Uint8>( ( *this->pFrameBufferInfo->boundImage )[idx] * 255 ),
             static_cast<Uint8>( ( *this->pFrameBufferInfo->boundImage )[idx] * 255 ),
-                                                                          255 );
+                                                                               255 );
         this->pFrameBufferInfo->renderer->DrawPoint( i , j );
       }
     this->pFrameBufferInfo->renderer->Present();
